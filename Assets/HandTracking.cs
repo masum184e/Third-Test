@@ -11,14 +11,13 @@ public class HandTracking : MonoBehaviour
 
     void Update(){
         // Copy local variable to avoid race condition with UDP thread
-        string data = udpReceiver.data;
+        string data = udpReceiver.landmarkData;
 
         if (string.IsNullOrEmpty(data)) return;
 
         try{
             // Parse the same JSON structure as in UDPReceiver
-            Packet packet = JsonUtility.FromJson<Packet>(data);
-            if (packet == null || packet.data == null || packet.type != "landmarks") return;
+            LandmarkData landmarks = JsonUtility.FromJson<LandmarkData>(data);
 
             // --- LEFT HAND ---
            float scale = 0.01f;
@@ -26,12 +25,12 @@ public class HandTracking : MonoBehaviour
         float offsetY = -2.0f;
 
         // --- LEFT HAND ---
-        if (packet.data.left != null && packet.data.left.Length >= 63) {
+        if (landmarks.left != null && landmarks.left.Length >= 63) {
             for (int i = 0; i < 21; i++) {
                 int baseIdx = i * 3;
-                float x = packet.data.left[baseIdx] * scale + offsetX;
-                float y = packet.data.left[baseIdx + 1] * scale + offsetY;
-                float z = packet.data.left[baseIdx + 2] * scale;
+                float x = landmarks.left[baseIdx] * scale + offsetX;
+                float y = landmarks.left[baseIdx + 1] * scale + offsetY;
+                float z = landmarks.left[baseIdx + 2] * scale;
 
                 if (i < leftHandPoints.Length)
                     leftHandPoints[i].transform.position = new Vector3(x, y, z);
@@ -39,12 +38,12 @@ public class HandTracking : MonoBehaviour
         }
 
         // --- RIGHT HAND ---
-        if (packet.data.right != null && packet.data.right.Length >= 63) {
+        if (landmarks.right != null && landmarks.right.Length >= 63) {
             for (int i = 0; i < 21; i++) {
                 int baseIdx = i * 3;
-                float x = -(packet.data.right[baseIdx]) * scale - offsetX; // mirror horizontally
-                float y = packet.data.right[baseIdx + 1] * scale + offsetY;
-                float z = packet.data.right[baseIdx + 2] * scale;
+                float x = -(landmarks.right[baseIdx]) * scale - offsetX; // mirror horizontally
+                float y = landmarks.right[baseIdx + 1] * scale + offsetY;
+                float z = landmarks.right[baseIdx + 2] * scale;
 
                 if (i < rightHandPoints.Length)
                     rightHandPoints[i].transform.position = new Vector3(x, y, z);

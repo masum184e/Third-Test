@@ -12,7 +12,8 @@ public class UDPReceiver : MonoBehaviour
     public int port = 5052;
     public bool startReceiving = true;
     public bool printToConsole = false;
-    public volatile string data;
+    public volatile string landmarkData;
+    public volatile string symbolData;
 
     void Start()
     {
@@ -32,20 +33,22 @@ public class UDPReceiver : MonoBehaviour
             {
                 byte[] dataBytes = client.Receive(ref anyIP);
                 string json = Encoding.UTF8.GetString(dataBytes);
-                data = json;
 
                 Packet packet = JsonUtility.FromJson<Packet>(json);
 
-                if (packet.type == "landmarks" && packet.data != null)
+                if (packet.type == "landmarks" && packet.landmarkData != null)
                 {
-                    int leftCount = packet.data.left?.Length ?? 0;
-                    int rightCount = packet.data.right?.Length ?? 0;
+                    int leftCount = packet.landmarkData.left?.Length ?? 0;
+                    int rightCount = packet.landmarkData.right?.Length ?? 0;
+
+                    landmarkData = JsonUtility.ToJson(packet.landmarkData);
 
                     if (printToConsole)
                         Debug.Log($"📡 Landmarks received | Left: {leftCount} pts, Right: {rightCount} pts");
                 }
-                else if (packet.type == "arithmetic")
+                else if (packet.type == "symbol" && packet.symbolData != null)
                 {
+                    symbolData = JsonUtility.ToJson(packet.symbolData);
                     if (printToConsole)
                         Debug.Log($"🧮 Arithmetic result");
                 }
@@ -70,7 +73,14 @@ public class UDPReceiver : MonoBehaviour
 public class Packet
 {
     public string type;
-    public LandmarkData data;
+    public LandmarkData landmarkData;
+    public SymbolData symbolData;
+}
+
+[Serializable]
+public class SymbolData
+{
+    public string value;
 }
 
 [Serializable]
