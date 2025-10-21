@@ -15,6 +15,8 @@ public class UDPReceiver : MonoBehaviour{
     public volatile string landmarkData;
     public volatile string symbolData;
     public volatile string modeData;
+    public volatile string expressionData;
+    public volatile string resultData;
 
     void Start(){
         receiveThread = new Thread(new ThreadStart(ReceiveData));
@@ -41,21 +43,39 @@ public class UDPReceiver : MonoBehaviour{
                     case "landmarks":
                         if (packet.landmarkData != null){
                             landmarkData = JsonUtility.ToJson(packet.landmarkData);
-                            if (printToConsole)Debug.Log($"Landmarks received");
+                            if (printToConsole)
+                                Debug.Log($"Landmarks received");
                         }
                         break;
 
                     case "symbol":
-                        if (packet.symbolData != null){
-                            symbolData = JsonUtility.ToJson(packet.symbolData);
-                            if (printToConsole)Debug.Log($"Symbol received");
+                        if (!string.IsNullOrEmpty(packet.symbolData)) {
+                            symbolData = packet.symbolData;
+                            if (printToConsole)
+                                Debug.Log($"Symbol received");
                         }
                         break;
 
                     case "mode":
-                        if (packet.modeData != null){
-                            modeData = JsonUtility.ToJson(packet.modeData);
-                            if (printToConsole)Debug.Log($"Mode received");
+                        if (!string.IsNullOrEmpty(packet.modeData)) {
+                            modeData = packet.modeData;
+                            if (printToConsole) Debug.Log($"Mode received: {modeData}");
+                        }
+                        break;
+
+                    case "expression":
+                        if (!string.IsNullOrEmpty(packet.expressionData)) {
+                            expressionData = packet.expressionData;
+                            if (printToConsole)
+                                Debug.Log($"Expression received");
+                        }
+                        break;
+
+                    case "result":
+                        if (!string.IsNullOrEmpty(packet.resultData)) {
+                            resultData = packet.resultData;
+                            if (printToConsole)
+                                Debug.Log($"Result received");
                         }
                         break;
                 }
@@ -82,13 +102,11 @@ public class Packet
 {
     public string type;
     public LandmarkData landmarkData;
-    public SymbolData symbolData;
-    public ModeData modeData;
+    public string symbolData;
+    public string modeData;
+    public string expressionData;
+    public string resultData;
 }
 
-[Serializable]
-public class SymbolData { public string value; }
-[Serializable]
-public class ModeData { public string value; }
 [Serializable]
 public class LandmarkData { public float[] left; public float[] right; }

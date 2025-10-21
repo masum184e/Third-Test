@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections;
 
-public class ButtonHandling : MonoBehaviour{
+public class ButtonHandling : MonoBehaviour {
     public UDPReceiver udpReceiver;
 
     [Header("Number Buttons")]
@@ -21,56 +21,47 @@ public class ButtonHandling : MonoBehaviour{
     public Button clearButton;
     public Button undoButton;
 
- private Color normalColor = Color.white;
-    private Color highlightColor = new Color(0.3f, 0.7f, 1f); 
+    private Color normalColor = Color.white;
+    private Color highlightColor = new Color(0.3f, 0.7f, 1f);
 
- private string lastSymbol = "";
+    private string lastSymbol = "";
     private float debounceTime = 1.0f;
     private float lastActionTime = 0f;
 
+    void Update() {
+        if (udpReceiver == null) {
+            Debug.LogWarning("⚠ ButtonHandling: Missing UDPReceiver reference!");
+            return;
+        }
 
-    void Update(){
-        string data = udpReceiver.symbolData;
+        string symbolText = udpReceiver.symbolData;
+        if (string.IsNullOrEmpty(symbolText))
+            return;
 
-        if (string.IsNullOrEmpty(data)) return;
-        try{
-            SymbolData symbolObj = JsonUtility.FromJson<SymbolData>(data);
-
-  if (symbolObj == null || string.IsNullOrEmpty(symbolObj.value))
+        try {
+            if (symbolText == lastSymbol && Time.time - lastActionTime < debounceTime)
                 return;
 
-            string symbol = symbolObj.value.Trim();
-
-            // Debounce duplicate inputs (avoid spam)
-            if (symbol == lastSymbol && Time.time - lastActionTime < debounceTime)
-                return;
-
-            lastSymbol = symbol;
+            lastSymbol = symbolText;
             lastActionTime = Time.time;
 
-            ClickButtonBySymbol(symbol);
+            ClickButtonBySymbol(symbolText);
         }
-                catch (Exception e)
-        {
-            Debug.LogWarning($"⚠ Button Handling JSON parse error: {e.Message}");
+        catch (Exception e) {
+            Debug.LogWarning($"⚠ ButtonHandling JSON parse error: {e.Message}");
         }
     }
 
-  private void ClickButtonBySymbol(string symbol)
-    {
+    private void ClickButtonBySymbol(string symbol) {
         Button targetButton = null;
 
         // --- Handle numbers (0–9)
-        if (int.TryParse(symbol, out int num))
-        {
+        if (int.TryParse(symbol, out int num)) {
             if (num >= 0 && num <= 9 && num < numberButtons.Length)
                 targetButton = numberButtons[num];
-        }
-        else
-        {
+        } else {
             // --- Handle operators and functions
-            switch (symbol)
-            {
+            switch (symbol) {
                 case "+": targetButton = plusButton; break;
                 case "-": targetButton = minusButton; break;
                 case "*": targetButton = multiplyButton; break;
@@ -79,49 +70,43 @@ public class ButtonHandling : MonoBehaviour{
                 case "(": targetButton = openParenButton; break;
                 case ")": targetButton = closeParenButton; break;
                 case "=": targetButton = equalButton; break;
-                case "C": 
+                case "C":
                 case "c": targetButton = clearButton; break;
-                case "U": 
-                case "u": 
+                case "U":
+                case "u":
                 case "undo": targetButton = undoButton; break;
                 default:
-                    Debug.LogWarning($"❓ Unknown symbol: {symbol}");
+                    Debug.LogWarning($"Unknown symbol: {symbol}");
                     break;
             }
         }
 
-        if (targetButton != null)
-        {
+        if (targetButton != null) {
             targetButton.onClick.Invoke();
-            Debug.Log($"✅ Clicked button: {symbol}");
+            Debug.Log($"Clicked button: {symbol}");
             StartCoroutine(FlashButton(targetButton));
-        }
-        else
-        {
+        } else {
             Debug.LogWarning($"⚠ No button assigned for symbol: {symbol}");
         }
     }
 
-  private IEnumerator FlashButton(Button button)
-{
-    Image img = button.GetComponent<Image>();
-    if (img != null)
-    {
-        Color original = img.color;
+    private IEnumerator FlashButton(Button button) {
+        Image img = button.GetComponent<Image>();
+        if (img != null) {
+            Color original = img.color;
 
-        // Flash immediately
-        img.color = highlightColor;
+            // Flash immediately
+            img.color = highlightColor;
 
-        // Wait briefly
-        yield return new WaitForSeconds(2f);
+            // Wait briefly
+            yield return new WaitForSeconds(0.2f); // faster flash feels better
 
-        // Restore original color
-        img.color = original;
+            // Restore original color
+            img.color = original;
 
-        // Force Button's transition system to reapply normal state
-        var colors = button.colors;
-        button.targetGraphic.color = colors.normalColor;
+            // Force Button's transition system to reapply normal state
+            var colors = button.colors;
+            button.targetGraphic.color = colors.normalColor;
+        }
     }
-}
-
 }

@@ -11,27 +11,27 @@ public class TextHandling : MonoBehaviour {
     public TextMeshProUGUI[] texts;
 
     void Update() {
-        // ✅ Ensure  exists
         if (udpReceiver == null) {
             Debug.LogWarning("⚠ TextHandling: Missing UDPReceiver reference!");
             return;
         }
 
-        string data = udpReceiver.modeData;
-        if (string.IsNullOrEmpty(data)) return;
+        string modeText = udpReceiver.modeData;
+        string expressionText = udpReceiver.expressionData;
+        string resultText = udpReceiver.resultData;
+
+        if (texts == null || texts.Length < 10)
+            return;
 
         try {
-            ModeData modeObj = JsonUtility.FromJson<ModeData>(data);
-            if (modeObj == null || string.IsNullOrEmpty(modeObj.value)) return;
+            if (!string.IsNullOrEmpty(expressionText) && texts[0] != null)
+                texts[0].text = expressionText;
 
-            string mode = modeObj.value.Trim();
+            if (!string.IsNullOrEmpty(resultText) && texts[1] != null)
+                texts[1].text = $"={resultText}";
 
-            if (texts == null || texts.Length <= 9 || texts[9] == null) {
-                Debug.LogWarning("⚠ TextHandling: Text element at index 9 is missing or not assigned!");
-                return;
-            }
-
-            texts[9].text = $"{mode}";
+            if (!string.IsNullOrEmpty(modeText) && texts[9] != null)
+                texts[9].text = modeText;
         }
         catch (Exception e) {
             Debug.LogWarning($"⚠ TextHandling JSON parse error: {e.Message}");
