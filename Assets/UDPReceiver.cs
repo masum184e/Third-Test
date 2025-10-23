@@ -39,46 +39,47 @@ public class UDPReceiver : MonoBehaviour{
                     continue;
                 }
 
-                switch (packet.type){
+               switch (packet.type){
                     case "landmarks":
-                        if (packet.landmarkData != null){
+                        if (packet.landmarkData != null &&
+                            ((packet.landmarkData.left != null && packet.landmarkData.left.Length > 0) ||
+                             (packet.landmarkData.right != null && packet.landmarkData.right.Length > 0))){
                             landmarkData = JsonUtility.ToJson(packet.landmarkData);
                             if (printToConsole)
-                                Debug.Log($"Landmarks received");
+                                Debug.Log("✅ Landmarks received");
+                        } else {
+                            // 🧹 Clear if empty or null
+                            landmarkData = "";
+                            if (printToConsole)
+                                Debug.Log("🧹 Landmarks cleared");
                         }
                         break;
 
                     case "symbol":
-                        if (!string.IsNullOrEmpty(packet.symbolData)) {
-                            symbolData = packet.symbolData;
-                            if (printToConsole)
-                                Debug.Log($"Symbol received");
-                        }
+                        symbolData = !string.IsNullOrEmpty(packet.symbolData) ? packet.symbolData : "";
+                        if (printToConsole)
+                            Debug.Log(string.IsNullOrEmpty(symbolData) ? "🧹 Symbol cleared" : "✅ Symbol received");
                         break;
 
                     case "mode":
-                        if (!string.IsNullOrEmpty(packet.modeData)) {
-                            modeData = packet.modeData;
-                            if (printToConsole) Debug.Log($"Mode received: {modeData}");
-                        }
+                        modeData = !string.IsNullOrEmpty(packet.modeData) ? packet.modeData : "";
+                        if (printToConsole)
+                            Debug.Log(string.IsNullOrEmpty(modeData) ? "🧹 Mode cleared" : $"✅ Mode received: {modeData}");
                         break;
 
                     case "expression":
-                        if (!string.IsNullOrEmpty(packet.expressionData)) {
-                            expressionData = packet.expressionData;
-                            if (printToConsole)
-                                Debug.Log($"Expression received");
-                        }
+                        expressionData = !string.IsNullOrEmpty(packet.expressionData) ? packet.expressionData : "";
+                        if (printToConsole)
+                            Debug.Log(string.IsNullOrEmpty(expressionData) ? "🧹 Expression cleared" : "✅ Expression received");
                         break;
 
                     case "result":
-                        if (!string.IsNullOrEmpty(packet.resultData)) {
-                            resultData = packet.resultData;
-                            if (printToConsole)
-                                Debug.Log($"Result received");
-                        }
+                        resultData = !string.IsNullOrEmpty(packet.resultData) ? packet.resultData : "";
+                        if (printToConsole)
+                            Debug.Log(string.IsNullOrEmpty(resultData) ? "🧹 Result cleared" : "✅ Result received");
                         break;
                 }
+
             }
             catch (Exception err){
                 Debug.LogWarning($"UDP Receiver error: {err.Message}");

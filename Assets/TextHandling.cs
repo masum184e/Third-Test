@@ -24,14 +24,14 @@ public class TextHandling : MonoBehaviour {
             return;
 
         try {
-            if (!string.IsNullOrEmpty(expressionText) && texts[0] != null)
-                texts[0].text = expressionText;
+            if (texts[0] != null)
+                texts[0].text = string.IsNullOrEmpty(expressionText) ? "" : expressionText;
 
-            if (!string.IsNullOrEmpty(resultText) && texts[1] != null)
-                texts[1].text = $"={resultText}";
+            if (texts[1] != null)
+                texts[1].text = string.IsNullOrEmpty(resultText) ? "" : $"={resultText}";
 
-            if (!string.IsNullOrEmpty(modeText) && texts[9] != null)
-                texts[9].text = modeText;
+            if (texts[9] != null)
+                texts[9].text = string.IsNullOrEmpty(modeText) ? "" : modeText;
         }
         catch (Exception e) {
             Debug.LogWarning($"⚠ TextHandling JSON parse error: {e.Message}");
