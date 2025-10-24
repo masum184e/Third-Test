@@ -17,6 +17,7 @@ public class UDPReceiver : MonoBehaviour{
     public volatile string modeData;
     public volatile string expressionData;
     public volatile string resultData;
+    public volatile string matrixData;
 
     void Start(){
         receiveThread = new Thread(new ThreadStart(ReceiveData));
@@ -52,6 +53,21 @@ public class UDPReceiver : MonoBehaviour{
                             landmarkData = "";
                             if (printToConsole)
                                 Debug.Log("🧹 Landmarks cleared");
+                        }
+                        break;
+
+                    case "matrix":
+                        if (packet.matrixData != null && packet.matrixData.Length > 0){
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < packet.matrixData.Length; i++){
+                                if (!string.IsNullOrEmpty(packet.matrixData[i]))
+                                    sb.AppendLine(packet.matrixData[i]);
+                            }
+                            matrixData = sb.ToString();
+                            if (printToConsole) Debug.Log($"✅ Matrix data received:\n{matrixData}");
+                        } else {
+                            matrixData = "";
+                            if (printToConsole) Debug.Log("🧹 Matrix cleared");
                         }
                         break;
 
@@ -107,6 +123,8 @@ public class Packet
     public string modeData;
     public string expressionData;
     public string resultData;
+    public string subModeData;
+    public string[] matrixData;
 }
 
 [Serializable]

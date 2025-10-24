@@ -19,6 +19,7 @@ public class TextHandling : MonoBehaviour {
         string modeText = udpReceiver.modeData;
         string expressionText = udpReceiver.expressionData;
         string resultText = udpReceiver.resultData;
+        string matrixText = udpReceiver.matrixData;
 
         if (texts == null || texts.Length < 10)
             return;
@@ -32,8 +33,21 @@ public class TextHandling : MonoBehaviour {
 
             if (texts[9] != null)
                 texts[9].text = string.IsNullOrEmpty(modeText) ? "" : modeText;
-        }
-        catch (Exception e) {
+
+
+            if (!string.IsNullOrEmpty(matrixText)){
+                string[] lines = matrixText.Split('\n');
+                for (int i = 0; i < Mathf.Min(lines.Length, texts.Length - 2); i++){
+                    Debug.Log($"{i} => {lines[i]}");
+                    texts[i].text = lines[i];
+                }
+            }else{
+                for(int i = 0; i < 10; i++){
+                    texts[i].text = "";
+                }
+            }
+
+        } catch (Exception e) {
             Debug.LogWarning($"⚠ TextHandling JSON parse error: {e.Message}");
         }
     }
