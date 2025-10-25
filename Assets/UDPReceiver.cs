@@ -14,10 +14,7 @@ public class UDPReceiver : MonoBehaviour{
 
     public volatile string landmarkData;
     public volatile string symbolData;
-    public volatile string modeData;
-    public volatile string expressionData;
-    public volatile string resultData;
-    public volatile string matrixData;
+    public volatile string boardData;
 
     void Start(){
         receiveThread = new Thread(new ThreadStart(ReceiveData));
@@ -56,18 +53,18 @@ public class UDPReceiver : MonoBehaviour{
                         }
                         break;
 
-                    case "matrix":
-                        if (packet.matrixData != null && packet.matrixData.Length > 0){
+                    case "board":
+                        if (packet.boardData != null && packet.boardData.Length > 0){
                             StringBuilder sb = new StringBuilder();
-                            for (int i = 0; i < packet.matrixData.Length; i++){
-                                if (!string.IsNullOrEmpty(packet.matrixData[i]))
-                                    sb.AppendLine(packet.matrixData[i]);
+                            for (int i = 0; i < packet.boardData.Length; i++){
+                                if (!string.IsNullOrEmpty(packet.boardData[i]))
+                                    if (printToConsole) Debug.Log($"✅ board data received:\n{i} {packet.boardData[i]}");
+                                    sb.AppendLine(packet.boardData[i]);
                             }
-                            matrixData = sb.ToString();
-                            if (printToConsole) Debug.Log($"✅ Matrix data received:\n{matrixData}");
+                            boardData = sb.ToString();
                         } else {
-                            matrixData = "";
-                            if (printToConsole) Debug.Log("🧹 Matrix cleared");
+                            boardData = "";
+                            if (printToConsole) Debug.Log("🧹 board cleared");
                         }
                         break;
 
@@ -77,23 +74,6 @@ public class UDPReceiver : MonoBehaviour{
                             Debug.Log(string.IsNullOrEmpty(symbolData) ? "🧹 Symbol cleared" : "✅ Symbol received");
                         break;
 
-                    case "mode":
-                        modeData = !string.IsNullOrEmpty(packet.modeData) ? packet.modeData : "";
-                        if (printToConsole)
-                            Debug.Log(string.IsNullOrEmpty(modeData) ? "🧹 Mode cleared" : $"✅ Mode received: {modeData}");
-                        break;
-
-                    case "expression":
-                        expressionData = !string.IsNullOrEmpty(packet.expressionData) ? packet.expressionData : "";
-                        if (printToConsole)
-                            Debug.Log(string.IsNullOrEmpty(expressionData) ? "🧹 Expression cleared" : "✅ Expression received");
-                        break;
-
-                    case "result":
-                        resultData = !string.IsNullOrEmpty(packet.resultData) ? packet.resultData : "";
-                        if (printToConsole)
-                            Debug.Log(string.IsNullOrEmpty(resultData) ? "🧹 Result cleared" : "✅ Result received");
-                        break;
                 }
 
             }
@@ -124,7 +104,7 @@ public class Packet
     public string expressionData;
     public string resultData;
     public string subModeData;
-    public string[] matrixData;
+    public string[] boardData;
 }
 
 [Serializable]

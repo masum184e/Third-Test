@@ -16,37 +16,29 @@ public class TextHandling : MonoBehaviour {
             return;
         }
 
-        string modeText = udpReceiver.modeData;
-        string expressionText = udpReceiver.expressionData;
-        string resultText = udpReceiver.resultData;
-        string matrixText = udpReceiver.matrixData;
+        string boardText = udpReceiver.boardData;
 
         if (texts == null || texts.Length < 10)
             return;
 
         try {
-            if (texts[0] != null)
-                texts[0].text = string.IsNullOrEmpty(expressionText) ? "" : expressionText;
+             if (!string.IsNullOrEmpty(boardText)) {
+                string[] lines = boardText.Split(new[] { '\n' }, StringSplitOptions.None);
 
-            if (texts[1] != null)
-                texts[1].text = string.IsNullOrEmpty(resultText) ? "" : $"={resultText}";
-
-            if (texts[9] != null)
-                texts[9].text = string.IsNullOrEmpty(modeText) ? "" : modeText;
-
-
-            if (!string.IsNullOrEmpty(matrixText)){
-                string[] lines = matrixText.Split('\n');
-                for (int i = 0; i < Mathf.Min(lines.Length, texts.Length - 2); i++){
-                    Debug.Log($"{i} => {lines[i]}");
-                    texts[i].text = lines[i];
+                // ✅ Always fill all 10 slots
+                for (int i = 0; i < texts.Length; i++) {
+                    if (i < lines.Length)
+                        texts[i].text = lines[i];
+                    else
+                        texts[i].text = "";
                 }
-            }else{
-                for(int i = 0; i < 10; i++){
+
+            } else {
+                // 🧹 Clear all text elements
+                for (int i = 0; i < texts.Length; i++) {
                     texts[i].text = "";
                 }
             }
-
         } catch (Exception e) {
             Debug.LogWarning($"⚠ TextHandling JSON parse error: {e.Message}");
         }
