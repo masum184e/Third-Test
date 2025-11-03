@@ -25,7 +25,7 @@ public class ButtonHandling : MonoBehaviour {
     private Color highlightColor = new Color(0.3f, 0.7f, 1f);
 
     private string lastSymbol = "";
-    private float debounceTime = 1.0f;
+    private float debounceTime = 0.2f;
     private float lastActionTime = 0f;
 
     void Update() {
